@@ -1,4 +1,4 @@
-function eval_deep_SDLPH(gmap, Fmap, maxItr, nbits,hammRadius,  topN, debug)
+function eval_deep_SDLPH(gmap, Fmap, alpha, maxItr, nbits,hammRadius,  topN, debug)
 % ---------- Argument defaults ----------
 if ~exist('nbits','var') || isempty(nbits)
     nbits=8;
@@ -16,9 +16,11 @@ end
 
 
 addpath 'C:\Users\Administrator\Documents\MATLAB\liblinear-2.1/windows/'  % for hinge loss
+addpath './Laplacian'  % Laplacian Functions
+
 %%  prepare_dataset(dataset);
-load('data\lfw_vgg_updated');
-[last_file, last_iter] = find_last_updated_result_file('result',nbits, hammRadius);
+load('data/lfw_vgg_updated');
+[last_file, last_iter] = find_last_updated_result_file('result_sdlph',nbits, hammRadius);
 
 %traindata = normalize_matrix_by_row(gallery_data);
 traindata = gallery_data;
@@ -54,11 +56,11 @@ randn('seed',3);
 B_init=sign(randn(Ntrain,nbits));
 if  ~isempty(last_file) && exist(['result_sdlph\' last_file], 'file')
     disp(['Loading History Result: result_sdlph\' last_file] );
-    B_init = load(['result\' last_file], 'B_init');
+    B_init = load(['result_sdlph\' last_file], 'B_init');
     B_init = B_init.B_init;
 end
 tic;
-[~, F, H] = SDLPH(X,label,B_init,gmap,Fmap,[],maxItr,debug);
+[~, F, H] = SDLPH(X,label,B_init,gmap,Fmap,alpha,[],maxItr,debug);
 toc;
 B_init = H;
 %% evaluation

@@ -1,4 +1,4 @@
-function [G, F, B] = SDLPH(X,y,B,gmap,Fmap,tol,maxItr,debug)
+function [G, F, B] = SDLPH(X,y,B,gmap,Fmap,alpha, tol,maxItr,debug)
 
 % ---------- Argument defaults ----------
 if ~exist('debug','var') || isempty(debug)
@@ -14,6 +14,11 @@ nu = Fmap.nu;
 delta = 1/nu;
 % ---------- End ----------
 
+nbits = size(B,2);
+L = adjMatrix(y);
+L = double((L));
+[V,D] = eigs(L, nbits);
+M = V*sqrt(D);
 % label matrix N x c
 if isvector(y) 
     Y = sparse(1:length(y), double(y), 1); Y = full(Y);
@@ -53,15 +58,31 @@ while i < maxItr
     switch gmap.loss
         case 'L2'
             Q = nu*XF + Y*Wg';
-            
             B = zeros(size(B));          
             for time = 1:10
                if debug,fprintf('Iteration  %03d, iterately updated B %d/10: \n',i, time);end
                Z0 = B;
                 for k = 1 : size(B,2)
-                    Zk = B; Zk(:,k) = [];
-                    Wkk = Wg(k,:); Wk = Wg; Wk(k,:) = [];                    
-                    B(:,k) = sign(Q(:,k) -  Zk*Wk*Wkk');
+                    
+                    Zk = B; 
+                    Zk(:,k) = [];
+                    
+                    % The k th row of W
+                    Wkk = Wg(k,:); 
+                    
+                    % W exclude k th row
+                    Wk = Wg; 
+                    Wk(k,:) = [];                    
+                    
+                    % do the same for M 
+                    Mkk = M(:,k);
+                    Mk = M;
+                    Mk(:,k) = [];
+                    
+                    %B(:,k) = sign(Q(:,k));
+                    B(:,k) = sign(Q(:,k) -  Zk*(alpha * Mk'*Mkk+Wk*Wkk') );
+                    %norm(Mk'*Mkk, 'fro')
+                    %norm(Wk*Wkk', 'fro')
                      if debug,fprintf('Iteration  %03d, iterately updated B %d/10 %d/%d bit: \n',i, time, k, size(B,2));end
                 end
                 
@@ -103,10 +124,7 @@ while i < maxItr
             break;
     end 
     
-    
     if norm(WF-WF0,'fro') < tol * norm(WF0)
         break;
     end
-    
-    
 end
