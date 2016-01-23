@@ -54,6 +54,9 @@ Y = [testdata, ones(Ntest, 1)];
 % Init Z
 randn('seed',3);
 B_init=sign(randn(Ntrain,nbits));
+if ~exist('result_sdlph', 'dir')
+    mkdir('result_sdlph');
+end
 if  ~isempty(last_file) && exist(['result_sdlph\' last_file], 'file')
     disp(['Loading History Result: result_sdlph\' last_file] );
     B_init = load(['result_sdlph\' last_file], 'B_init');

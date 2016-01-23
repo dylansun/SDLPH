@@ -52,9 +52,12 @@ Y = [testdata, ones(Ntest, 1)];
 % Init Z
 randn('seed',3);
 B_init=sign(randn(Ntrain,nbits));
-if  ~isempty(last_file) && exist(['result\' last_file], 'file')
-    disp(['Loading History Result: result\' last_file] );
-    B_init = load(['result\' last_file], 'B_init');
+if ~exist('result_sdh\', 'dir')
+    mkdir('result_sdh\');
+end
+if  ~isempty(last_file) && exist(['result_sdh\' last_file], 'file')
+    disp(['Loading History Result: result_sdh\' last_file] );
+    B_init = load(['result_sdh\' last_file], 'B_init');
     B_init = B_init.B_init;
 end
 tic;

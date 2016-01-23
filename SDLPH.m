@@ -15,10 +15,20 @@ delta = 1/nu;
 % ---------- End ----------
 
 nbits = size(B,2);
-L = adjMatrix(y);
-L = double((L));
-[V,D] = eigs(L, nbits);
-M = V*sqrt(D);
+saved_Laplacian = ['model/L_' num2str(nbits) '.mat'];
+if ~exist('model', 'dir')
+    mkdir('model');
+end
+if ~exist(saved_Laplacian, 'file')
+    L = adjMatrix(y);
+    L = double((L));
+    [V,D] = eigs(L, nbits);
+    M = V*sqrt(D);
+    save(saved_Laplacian, 'M','L');
+else
+    load(saved_Laplacian);
+end
+
 % label matrix N x c
 if isvector(y) 
     Y = sparse(1:length(y), double(y), 1); Y = full(Y);
